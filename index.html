@@ -191,5 +191,17 @@ function ready(error, countylines, statelines) {
   // draw a circle around NY
   map.append("circle").attr("r",5).attr("transform", function() {return "translate(" + projection([-75,43]) + ")";});
 
+  // Outside the sandbox, webservice that loads from a database
+  // then map them onto D3
+
+  // Asynchronous csv function
+  // http GET request for comma-separated csv values at specified url
+  d3.csv("722010TY.csv", function(unparsedData){
+    first = unparsedData[0];
+    console.log(first);
+  })
+ //   .get(function(error, rows) { console.log(rows); });
+  
+
 };
 </script>
