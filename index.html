@@ -118,7 +118,7 @@ function ready(error, us) {
 
 </script>
 <script type="text/javascript">
-var xym = d3.geo.albersUsa(); // default projection type for d3.geo.path
+var projection = d3.geo.albersUsa(); // default projection type for d3.geo.path
 var urls = {
 	    counties: "us-counties.json",
 	    states: "us-states.json"
@@ -126,7 +126,7 @@ var urls = {
   , margin = { top: 0, right: 0, bottom: 0, left: 0 }
   , width = 960 - margin.right - margin.left
   , height = 500
-  , path = d3.geo.path().projection(xym)
+  , path = d3.geo.path().projection(projection)
   , map;
 
 var q = queue()
@@ -184,6 +184,9 @@ function ready(error, countylines, statelines) {
         var name = [d.properties.name, d.properties.state].join(', ');
 		caption.html(name);
 	}
+
+  // draw a circle around NY
+  map.append("circle").attr("r",5).attr("transform", function() {return "translate(" + projection([-75,43]) + ")";});
 
 };
 </script>
