@@ -135,6 +135,7 @@ var q = queue()
     .await(ready);
 
 function ready(error, countylines, statelines) {
+  /* BASIC US MAP */
 	window.error = error;
     window.countylines = countylines;
     window.statelines = statelines;
@@ -184,6 +185,8 @@ function ready(error, countylines, statelines) {
         var name = [d.properties.name, d.properties.state].join(', ');
 		caption.html(name);
 	}
+
+  /* END BASIC US MAP */
 
   // draw a circle around NY
   map.append("circle").attr("r",5).attr("transform", function() {return "translate(" + projection([-75,43]) + ")";});
