@@ -2,6 +2,25 @@
 <meta charset="utf-8">
 <style>
 
+.counties path {
+  stroke: #fff;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+  fill: #81abce;
+}
+
+.states {
+  stroke: #fff;
+  stroke-width: 1px;
+  fill: none;
+}
+
+.counties path:hover {
+  fill: Steelblue;
+}
+
+
+/*
 .counties {
   fill: none;
 }
@@ -23,12 +42,22 @@
 .q8-9 { fill:rgb(8,48,107); }
 
 </style>
+
 <body>
+
+<h3 id="caption">Sighten Solar Map</h3>
+
+<div id="map">
+	<h4 class="loading">Loading...</h4>
+</div>
+
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
 
+    /*
+// SVG Dimensions
 var width = 960,
     height = 500;
 
@@ -40,12 +69,33 @@ var quantize = d3.scale.quantize()
 
 var path = d3.geo.path();
 
+var projection = d3.geo.mercator()
+  .center([0, 5 ])
+  .scale(900)
+  .rotate([-180,0]);
+
+// Set up the initial map
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+var group = svg.append("g");
+
+d3.json("us.json", function(collection) {
+  group.selectAll('path')
+    .data(collection.features)
+  .enter().append('path')
+    .attr('d', path)
+    //.attr('d', d3.geo.path().projection(projection))
+    //.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+  .style('fill', 'gray')
+  .style('stroke', 'white')
+  .style('stroke-width', 1);
+});
+
 queue()
-    .defer(d3.json, "us.json")
+    .defer(d3.json, "solar.json")
+    //.defer(d3.json, "us.json")
     .defer(d3.tsv, "unemployment.tsv", function(d) { rateById.set(d.id, +d.rate); })
     .await(ready);
 
@@ -53,7 +103,8 @@ function ready(error, us) {
   svg.append("g")
       .attr("class", "counties")
     .selectAll("path")
-      .data(topojson.feature(us, us.objects.counties).features)
+      //.data(topojson.feature(us, us.objects.counties).features)
+      .data(json.features)
     .enter().append("path")
       .attr("class", function(d) { return quantize(rateById.get(d.id)); })
       .attr("d", path);
@@ -63,5 +114,76 @@ function ready(error, us) {
       .attr("class", "states")
       .attr("d", path);
 }
+*/
 
+</script>
+<script type="text/javascript">
+var xym = d3.geo.albersUsa(); // default projection type for d3.geo.path
+var urls = {
+	    counties: "us-counties.json",
+	    states: "us-states.json"
+	}
+  , margin = { top: 0, right: 0, bottom: 0, left: 0 }
+  , width = 960 - margin.right - margin.left
+  , height = 500
+  , path = d3.geo.path().projection(xym)
+  , map;
+
+var q = queue()
+    .defer(d3.json, "us-counties.json")
+    .defer(d3.json, "us-states.json")
+    .await(ready);
+
+function ready(error, countylines, statelines) {
+	window.error = error;
+    window.countylines = countylines;
+    window.statelines = statelines;
+
+	if (error) throw error;
+
+    var stateIds = {};
+    statelines.features.forEach(function(d) {
+        stateIds[d.id] = d.properties.name;
+    });
+
+    countylines.features.forEach(function(d) {
+        d.properties.state = stateIds[d.id.slice(0,2)];
+    })
+
+	// remove the loading text
+	d3.select('.loading').remove();
+
+	map = d3.select('#map').append('svg')
+	    .style('width', width)
+	    .style('height', height);
+
+	var counties = map.append('g')
+	    .attr('class', 'counties')
+	  .selectAll('path')
+	    .data(countylines.features)
+	  .enter().append('path')
+	    .attr('d', path);
+
+	counties.on('mouseover', showCaption)
+	    .on('mousemove', showCaption)
+	    .on('mouseout', function() {
+	    	caption.html(starter);
+	    });
+
+	var states = map.append('g')
+	    .attr('class', 'states')
+	  .selectAll('path')
+	    .data(statelines.features)
+	  .enter().append('path')
+	    .attr('d', path);
+
+	var caption = d3.select('#caption')
+	  , starter = caption.html();
+
+	function showCaption(d, i) {
+        var name = [d.properties.name, d.properties.state].join(', ');
+		caption.html(name);
+	}
+
+};
 </script>
