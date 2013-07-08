@@ -4,6 +4,7 @@ Chloropleth for Solar Financing
 Running
 ------
  * Run python -m SimpleHTTPServer 8888 to avoid same origin policy
+ * Open localhost:8888/index.html
 
 
 Notes
